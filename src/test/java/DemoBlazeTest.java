@@ -4,18 +4,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static com.codeborne.selenide.Condition.hidden;
 import static com.codeborne.selenide.Selectors.*;
 import static com.codeborne.selenide.Selenide.*;
 
-
 public class DemoBlazeTest {
-    //ElementsCollection SelenideElements;
+
     ElementsCollection cards = $$(byId("#tbodyid"));
-    // ElementsCollection headerSite = SelenideElements(Selectors.byCssSelector("#nav-item active"));
-    // ElementsCollection homeBtn = SelenideElements(Selectors.byXpath("//*[text()='Home ']"));
     SelenideElement homeBtn = $x("//*[text()='Home ']");
     SelenideElement AddToCartBtn = $(byText("Add to cart"));
     SelenideElement nokiaLumiaCard = $(byText("Nokia lumia 1520"));
@@ -24,8 +19,7 @@ public class DemoBlazeTest {
 
     @BeforeEach
     void setUp() {
-        // Открываем сайт
-        open("https://demoblaze.com");
+        open("https://demoblaze.com"); // Открываем сайт
     }
 
     @AfterEach
@@ -35,17 +29,16 @@ public class DemoBlazeTest {
 
     @Test
     void testAddProductsToCartAndPlaceOrder() {
-
         int totalPrice = 0;
 
         nokiaLumiaCard.click();
         String priceNokiaRaw = $("h3").getText(); // Получаем текст цены как строку
         String cleanedNokiaPrice = extractNumbers(priceNokiaRaw);
         int priceNokia = Integer.parseInt(cleanedNokiaPrice);
-        totalPrice += priceNokia;
-        AddToCartBtn.click();                                         // Клик по кнопке "Add to Cart"
-        confirm();                                           // Закрываем диалоговое окно
-        homeBtn.click();                                                    // Возвращаемся на главную
+        totalPrice += priceNokia; //суммируем цену
+        AddToCartBtn.click(); // Клик по кнопке "Add to Cart"
+        confirm(); // Закрываем диалоговое окно
+        homeBtn.click(); // Возвращаемся на главную страницу
 
         iphoneCard.click();
         String priceIphoneRaw = $("h3").getText();
@@ -64,45 +57,29 @@ public class DemoBlazeTest {
         AddToCartBtn.click();
         confirm();
         homeBtn.click();
-        // Выводим итоговую сумму
-        System.out.println("Общая сумма всех товаров: " + totalPrice);
 
-        $("#cartur").click();                       // Открываем корзину
-        $(byText("Place Order")).click();
+        System.out.println("ОSum of products: " + totalPrice); // Выводим итоговую сумму
+        $("#cartur").click(); // Открываем корзину
+        int fullPrice = calculateTotalPrice();
+        System.out.println("Total price in cart: " + fullPrice);//Выводим итоговую сумму
 
-        ElementsCollection priceCells = $$("table tbody tr td:nth-child(3)");
-        List<String> cartPrices = priceCells.texts();
+        $(byText("Place Order")).click(); // Нажимаем Place Order
 
-        int sumInCart = cartPrices.stream()
-                .map(String::trim)                  // убираем пробелы
-                .mapToInt(Integer::parseInt)       // преобразуем в int
-                .sum();
-
-        System.out.println("Сумма в корзине: " + sumInCart);
-
-//ElementsCollection priceCells = $$("table tbody tr td:nth-child(3)").filter(Condition.visible);
-        // Заполняем форму заказа
-        $("#name").setValue("John Doe");
+        $("#name").setValue("John Doe"); // Заполняем форму заказа
         $("#country").setValue("USA");
         $("#city").setValue("New York");
         $("#card").setValue("4151178111118911");
         $("#month").setValue("10");
         $("#year").setValue("2000");
 
-        // Нажимаем "Purchase"
-        $(byAttribute("onclick", "purchaseOrder()")).click();
+        $(byAttribute("onclick", "purchaseOrder()")).click(); // Нажимаем "Purchase"
 
-        // Ждём окна подтверждения (зелёная галочка)
-        // $(".sweet-alert").shouldBe(visible);
-        // $("sa-confirm-button-container").click(); //нажимаем ок style="display: inline-block;"
-        // $(byAttribute("style", "display: inline-block;")).click();
+// Ждём окна подтверждения (зелёная галочка)
 
-        // Получаем полный текст подтверждения
-        String confirmationText = $(".sweet-alert").getText();
+        String confirmationText = $(".sweet-alert").getText(); // Получаем полный текст подтверждения
         String[] lines = confirmationText.split("\n");
 
-        // Ищем строку с ID заказа
-        String idText = null;
+        String idText = null; // Ищем строку с ID заказа
         for (String line : lines) {
             if (line.contains("Id:")) {
                 idText = line.trim();
@@ -113,16 +90,11 @@ public class DemoBlazeTest {
             throw new AssertionError("Не найден ID заказа в подтверждении");
         }
 
+        System.out.println(idText); // Выводим ID заказа в консоль
 
-        // Выводим ID заказа в консоль
-        System.out.println(idText);
+        $(byText("OK")).click(); // Кликаем "OK" в окне подтверждения
 
-        // Кликаем "OK" в окне подтверждения
-        //$(".sa-button-container button").click();
-        $(byText("OK")).click();
-
-        // Проверяем, что окно подтверждения закрылось
-        $("#sweet-alert  showSweetAlert visible").shouldBe(hidden);
+        $("#sweet-alert showSweetAlert visible").shouldBe(hidden);// Проверяем, что окно подтверждения закрылось
     }
 
     private String extractNumbers(String text) {
@@ -130,20 +102,21 @@ public class DemoBlazeTest {
             throw new IllegalArgumentException("Строка пуста или null: " + text);
         }
 
-        // Удаляем все символы, кроме цифр
-        String cleaned = text.replaceAll("[^\\d]", "");
-
+        String cleaned = text.replaceAll("[^\\d]", ""); // Удаляем все символы, кроме цифр
         if (cleaned.isEmpty()) {
             throw new IllegalArgumentException(
-                    "После очистки строка не содержит цифр. Исходная: " + text
-            );
+                    "После очистки строка не содержит цифр. Исходная: " + text);
         }
-
         return cleaned;
-
     }
 
-    private int parsePrice(String priceText) {
-        return Integer.parseInt(priceText.trim());
+    private int calculateTotalPrice() {
+        int totalPrice = 0;
+        for (int i = 1; i <= 3; i++) {
+            String priceText = $x("//tr[" + i + "]/td[3]").getText();
+            int price = Integer.parseInt(priceText.replaceAll("[^0-9]", ""));
+            totalPrice += price;
+        }
+        return totalPrice;
     }
 }
